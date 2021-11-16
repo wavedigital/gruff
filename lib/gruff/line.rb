@@ -40,6 +40,10 @@ class Gruff::Line < Gruff::Base
   # The number of vertical lines shown.
   attr_writer :marker_x_count
 
+  # Output the values for the dots on a line graph.
+  # Default is +false+.
+  attr_writer :show_labels_for_dot_values
+
   # Get the value if somebody has defined it.
   def baseline_value
     if @reference_lines.key?(:baseline)
@@ -154,6 +158,8 @@ private
     @dot_style = 'circle'
 
     @show_vertical_markers = false
+
+    @show_labels_for_dot_values = false
   end
 
   def draw_reference_line(reference_line, left, right, top, bottom)
@@ -181,7 +187,7 @@ private
       draw_vertical_reference_line(curr_reference_line) if curr_reference_line.key?(:index)
     end
 
-    store.norm_data.each do |data_row|
+    store.norm_data.each_with_index do |data_row, data_index|
       prev_x = prev_y = nil
 
       one_point = contains_one_point_only?(data_row)
@@ -215,6 +221,11 @@ private
 
         if one_point || !@hide_dots
           Gruff::Renderer::Dot.new(renderer, @dot_style, color: data_row.color, width: stroke_width).render(new_x, new_y, circle_radius)
+          if @show_labels_for_dot_values
+            label = store.data[data_index].y_points[index]
+            label_y = new_y - 50
+            draw_value_label(new_x, label_y, dot_label(label), @title_font)
+          end
         end
 
         prev_x = new_x
@@ -292,5 +303,13 @@ private
 
   def contains_one_point_only?(data_row)
     data_row.y_points.compact.count == 1
+  end
+
+  def dot_label(value)
+    if @y_axis_label_format
+      @y_axis_label_format.call(value)
+    else
+      value
+    end
   end
 end

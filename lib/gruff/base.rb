@@ -710,7 +710,7 @@ module Gruff
       end
 
       text_renderer = Gruff::Renderer::Text.new(renderer, @title, font: @title_font)
-      text_renderer.add_to_render_queue(@raw_columns, 1.0, 0, @top_margin)
+      text_renderer.add_to_render_queue(@raw_columns, 1.0, @left_margin, @top_margin, Magick::NorthWestGravity)
     end
 
     # Draws column labels below graph, centered over x_offset
@@ -748,10 +748,10 @@ module Gruff
     end
 
     # Draws the data value over the data point in bar graphs
-    def draw_value_label(x_offset, y_offset, data_point)
+    def draw_value_label(x_offset, y_offset, data_point, font = @marker_font)
       return if @hide_line_markers
 
-      text_renderer = Gruff::Renderer::Text.new(renderer, data_point, font: @marker_font)
+      text_renderer = Gruff::Renderer::Text.new(renderer, data_point, font: font)
       text_renderer.add_to_render_queue(1.0, 1.0, x_offset, y_offset)
     end
 
